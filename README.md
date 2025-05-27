@@ -10,11 +10,11 @@ Gravity AI is an AI Experience Platform that goes beyond traditional chat interf
 
 ## Features
 
-- 🎯 **Server-controlled rendering** - Components determined dynamically by Gravity server
-- ⚛️ **React components** - Pre-built components for all Gravity message types  
-- 🚀 **Real-time streaming** - Live updates via GraphQL subscriptions
-- 📡 **Message handling** - Automatic parsing and rendering of Gravity messages
-- 🔧 **Simple integration** - Drop into any React app with minimal setup
+- **Server-controlled rendering** - Components determined dynamically by Gravity server
+- **React components** - Pre-built components for all Gravity message types  
+- **Real-time streaming** - Live updates via GraphQL subscriptions
+- **Message handling** - Automatic parsing and rendering of Gravity messages
+- **Simple integration** - Drop into any React app with minimal setup
 
 ## Installation
 
@@ -139,6 +139,7 @@ function ExperienceInterface() {
     </div>
   );
 }
+```
 
 ### Real-time Response Handling
 
@@ -169,10 +170,9 @@ function StreamingResponse() {
     </div>
   );
 }
+```
 
 ## TypeScript Support
-
-Full TypeScript support with exported types:
 
 ```typescript
 import type {
