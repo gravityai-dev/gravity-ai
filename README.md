@@ -74,6 +74,7 @@ function GravityExperience() {
     </div>
   );
 }
+```
 
 ## Chat States
 
@@ -111,6 +112,7 @@ function CustomExperience() {
     </div>
   );
 }
+```
 
 ### Connection Status Handling
 
@@ -174,6 +176,8 @@ function StreamingResponse() {
 
 ## TypeScript Support
 
+Full TypeScript support with exported types:
+
 ```typescript
 import type {
   GravityConfig,
@@ -182,6 +186,7 @@ import type {
   MessageType,
   ActiveResponse
 } from '@gravityai-dev/gravity-ai';
+```
 
 ## Requirements
 
