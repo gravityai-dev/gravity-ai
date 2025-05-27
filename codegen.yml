@@ -1,0 +1,15 @@
+overwrite: true
+schema: "../server/src/server/graphql/schema.graphql"
+documents: "./src/graphql/operations.ts"
+generates:
+  src/graphql/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+    config:
+      withHooks: true
+      withComponent: false
+      withHOC: false
+      skipTypename: false
+      dedupeFragments: true
