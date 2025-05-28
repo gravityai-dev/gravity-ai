@@ -86,6 +86,15 @@ export interface UserMessage extends BaseMessage {
   __typename: 'UserMessage';
 }
 
+export interface AudioChunk extends BaseMessage {
+  __typename: 'AudioChunk';
+  audioData: string; // base64 encoded audio
+  format: string; // e.g., 'mp3', 'wav'
+  sourceType?: string; // e.g., 'MessageChunk', 'ProgressUpdate'
+  textReference?: string; // the original text that was converted to audio
+  duration?: number; // duration in seconds
+}
+
 // Union type
 export type GravityMessage = 
   | MessageChunk 
@@ -97,7 +106,8 @@ export type GravityMessage =
   | MdxComponent 
   | ImageResponse 
   | ToolOutput
-  | UserMessage;
+  | UserMessage
+  | AudioChunk;
 
 // Server-side message format (includes both type and __typename)
 export interface ServerMessage extends BaseMessage {
@@ -139,7 +149,8 @@ export enum MessageType {
   MESSAGE_CHUNK = 'message_chunk',
   PROGRESS_UPDATE = 'progress_update',
   METADATA = 'metadata',
-  USER_MESSAGE = 'user_message'
+  USER_MESSAGE = 'user_message',
+  AUDIO_CHUNK = 'audio_chunk'
 }
 
 // GraphQL message type names for Apollo type policies
@@ -153,7 +164,8 @@ export const GRAPHQL_MESSAGE_TYPES = [
   "MdxComponent",
   "ImageResponse",
   "ToolOutput",
-  "UserMessage"
+  "UserMessage",
+  "AudioChunk"
 ] as const;
 
 // Mapping from MessageType to GraphQL __typename
@@ -167,7 +179,8 @@ export const TYPE_TO_TYPENAME: Record<MessageType, string> = {
   [MessageType.MESSAGE_CHUNK]: 'MessageChunk',
   [MessageType.PROGRESS_UPDATE]: 'ProgressUpdate',
   [MessageType.METADATA]: 'Metadata',
-  [MessageType.USER_MESSAGE]: 'UserMessage'
+  [MessageType.USER_MESSAGE]: 'UserMessage',
+  [MessageType.AUDIO_CHUNK]: 'AudioChunk'
 };
 
 // Helper functions for creating messages
@@ -274,5 +287,17 @@ export function createUserMessage(base: BaseMessage): UserMessage {
   return {
     ...base,
     __typename: 'UserMessage'
+  };
+}
+
+export function createAudioChunk(base: BaseMessage, audioData: string, format: string, textReference?: string, sourceType?: string, duration?: number): AudioChunk {
+  return {
+    ...base,
+    __typename: 'AudioChunk',
+    audioData,
+    format,
+    textReference,
+    sourceType,
+    duration
   };
 }

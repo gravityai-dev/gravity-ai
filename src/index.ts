@@ -11,6 +11,8 @@ export { GravityContainer } from './components/GravityContainer';
 export { useGravity } from './hooks/useGravity';
 export { useActiveResponse } from './hooks/useActiveResponse';
 export { useConnection } from './hooks/useConnection';
+export { useVoiceStream } from './hooks/useVoiceStream';
+export type { VoiceStreamOptions, VoiceStreamState } from './hooks/useVoiceStream';
 
 // UI Components
 export { default as Avatar } from './components/ui/Avatar';
@@ -18,10 +20,15 @@ export { default as Bubble } from './components/ui/Bubble';
 export { default as BouncingBalls } from './components/ui/BouncingBalls';
 export { default as TimeStamp } from './components/ui/TimeStamp';
 export { InAppLink } from './components/ui/InAppLink';
+export { VoiceToggle } from './components/ui/VoiceToggle';
+export { VoiceInput, useVoiceInput } from './components/VoiceInput';
+export type { VoiceInputProps } from './components/VoiceInput';
 
 // Message components
 export { MdxComponent } from './messages/MdxComponent';
 export { GravityCX } from './messages/GravityCX';
+export { VoiceStream } from './components/VoiceStream';
+export type { VoiceStreamProps } from './components/VoiceStream';
 
 // Store and actions
 export { useGravityStore } from './store';
@@ -42,6 +49,10 @@ export function toggleSidebar(forceState?: boolean) {
 export function setActiveObject(id: string | null) {
   return useGravityStore.getState().setActiveObject(id);
 }
+
+// Utilities
+export { transformServerToClientMessage } from './shared';
+export { audioEventEmitter } from './utils/audioEventEmitter';
 
 // Types
 export type {

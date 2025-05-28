@@ -1,9 +1,10 @@
 /**
- * Active response slice for managing streaming AI responses
- * Preserves the complex state machine from the original implementation
+ * Active response slice for managing the current AI response
+ * Handles streaming messages and state management
  */
 
 import { ActiveResponse, GravityStore, GravityEvent, ChatState, MessageType } from '../../types';
+import { audioEventEmitter } from '../../utils/audioEventEmitter';
 
 export interface ActiveResponseSlice {
   activeResponse: ActiveResponse;
@@ -90,6 +91,18 @@ export const createActiveResponseSlice = (
         case 'MessageChunk':
           // Only update the chunks array - keep it separate from text
           newState.messageChunks = [...newState.messageChunks, message];
+          break;
+
+        case MessageType.AUDIO_CHUNK:
+        case 'AudioChunk':
+          // Don't store audio chunks - they're transient and handled by VoiceStream component
+          // Emit the audio chunk for components to handle
+          console.log('[ActiveResponse] Emitting AudioChunk:', {
+            conversationId: message.conversationId,
+            hasData: !!(message as any).audioData,
+            format: (message as any).format
+          });
+          audioEventEmitter.emit(message as any);
           break;
 
         case MessageType.PROGRESS_UPDATE:

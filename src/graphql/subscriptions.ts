@@ -91,6 +91,19 @@ export const AI_RESULT_SUBSCRIPTION = gql`
         result
         mdxContent
       }
+      ... on AudioChunk {
+        chatId
+        conversationId
+        userId
+        providerId
+        timestamp
+        state
+        audioData
+        format
+        duration
+        textReference
+        sourceType
+      }
     }
   }
 `;

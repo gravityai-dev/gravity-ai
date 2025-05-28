@@ -44,7 +44,7 @@ export interface ConversationSlice {
   setConversationId: (id: string) => void;
   addMessage: (message: GravityEvent) => void;
   clearConversation: () => void;
-  sendMessage: (text: string, userId?: string) => Promise<void>;
+  sendMessage: (text: string, userId?: string, enableAudio?: boolean) => Promise<void>;
 }
 
 /**
@@ -113,8 +113,9 @@ export const createConversationSlice = (
    *
    * @param text - The message text to send
    * @param userId - Optional user ID, defaults to 'anonymous'
+   * @param enableAudio - Optional flag to enable audio generation for responses
    */
-  sendMessage: async (text: string, userId?: string) => {
+  sendMessage: async (text: string, userId?: string, enableAudio?: boolean) => {
     const state = get();
     const {
       connection,
@@ -163,6 +164,14 @@ export const createConversationSlice = (
       // Send message to server via GraphQL mutation
       // The server will create the proper message event and send it back through the subscription
       try {
+        console.log('[Gravity AI] Sending mutation with:', {
+          conversationId,
+          chatId,
+          userId: userId || 'anonymous',
+          enableAudio: enableAudio,
+          text: text
+        });
+        
         const response = await connection.client.mutate({
           mutation: TALK_TO_AGENT,
           variables: {
@@ -171,6 +180,7 @@ export const createConversationSlice = (
               conversationId: conversationId,
               chatId: chatId,
               userId: userId || 'anonymous',
+              enableAudio: enableAudio,
             },
           },
         });

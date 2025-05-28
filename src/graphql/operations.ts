@@ -103,6 +103,19 @@ export const AGENT_STREAM = gql`
         result
         mdxContent
       }
+      ... on AudioChunk {
+        chatId
+        conversationId
+        userId
+        providerId
+        timestamp
+        state
+        audioData
+        format
+        duration
+        textReference
+        sourceType
+      }
     }
   }
 `;

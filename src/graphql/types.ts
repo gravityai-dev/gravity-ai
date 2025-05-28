@@ -31,11 +31,12 @@ export type ActionSuggestion = BaseEvent & {
   userId: Scalars['ID']['output'];
 };
 
-export type AgentEvent = ActionSuggestion | ImageResponse | JsonData | MessageChunk | Metadata | ProgressUpdate | Text | ToolOutput;
+export type AgentEvent = ActionSuggestion | AudioChunk | ImageResponse | JsonData | MessageChunk | Metadata | ProgressUpdate | Text | ToolOutput;
 
 export type AgentInput = {
   chatId: Scalars['ID']['input'];
   conversationId: Scalars['ID']['input'];
+  enableAudio?: InputMaybe<Scalars['Boolean']['input']>;
   message: Scalars['String']['input'];
   metadata?: InputMaybe<Scalars['JSON']['input']>;
   providerId?: InputMaybe<Scalars['String']['input']>;
@@ -58,6 +59,21 @@ export type AgentTypeInfo = {
   __typename?: 'AgentTypeInfo';
   examples?: Maybe<Scalars['JSON']['output']>;
   types: Array<Scalars['String']['output']>;
+};
+
+export type AudioChunk = BaseEvent & {
+  __typename?: 'AudioChunk';
+  audioData: Scalars['String']['output'];
+  chatId: Scalars['ID']['output'];
+  conversationId: Scalars['ID']['output'];
+  duration?: Maybe<Scalars['Float']['output']>;
+  format: Scalars['String']['output'];
+  providerId?: Maybe<Scalars['String']['output']>;
+  sourceType: Scalars['String']['output'];
+  state?: Maybe<ChatState>;
+  textReference?: Maybe<Scalars['String']['output']>;
+  timestamp?: Maybe<Scalars['String']['output']>;
+  userId: Scalars['ID']['output'];
 };
 
 export type BaseEvent = {
@@ -267,7 +283,7 @@ export type AgentStreamSubscriptionVariables = Exact<{
 }>;
 
 
-export type AgentStreamSubscription = { __typename?: 'Subscription', aiResult: { __typename: 'ActionSuggestion', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, type: string, payload: any, mdxContent?: string | null } | { __typename: 'ImageResponse', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, url: string, alt?: string | null, mdxContent?: string | null } | { __typename: 'JsonData', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, data: any, mdxContent?: string | null } | { __typename: 'MessageChunk', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, text: string, mdxContent?: string | null } | { __typename: 'Metadata', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, message: string, mdxContent?: string | null } | { __typename: 'ProgressUpdate', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, message: string, mdxContent?: string | null } | { __typename: 'Text', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, text: string, mdxContent?: string | null } | { __typename: 'ToolOutput', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, tool: string, result: any, mdxContent?: string | null } };
+export type AgentStreamSubscription = { __typename?: 'Subscription', aiResult: { __typename: 'ActionSuggestion', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, type: string, payload: any, mdxContent?: string | null } | { __typename: 'AudioChunk', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, audioData: string, format: string, duration?: number | null, textReference?: string | null, sourceType: string } | { __typename: 'ImageResponse', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, url: string, alt?: string | null, mdxContent?: string | null } | { __typename: 'JsonData', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, data: any, mdxContent?: string | null } | { __typename: 'MessageChunk', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, text: string, mdxContent?: string | null } | { __typename: 'Metadata', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, message: string, mdxContent?: string | null } | { __typename: 'ProgressUpdate', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, message: string, mdxContent?: string | null } | { __typename: 'Text', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, text: string, mdxContent?: string | null } | { __typename: 'ToolOutput', chatId: string, conversationId: string, userId: string, providerId?: string | null, timestamp?: string | null, state?: ChatState | null, tool: string, result: any, mdxContent?: string | null } };
 
 export type GetChatStatusQueryVariables = Exact<{
   chatId: Scalars['ID']['input'];
@@ -402,6 +418,19 @@ export const AgentStreamDocument = gql`
       tool
       result
       mdxContent
+    }
+    ... on AudioChunk {
+      chatId
+      conversationId
+      userId
+      providerId
+      timestamp
+      state
+      audioData
+      format
+      duration
+      textReference
+      sourceType
     }
   }
 }

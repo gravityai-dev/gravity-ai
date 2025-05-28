@@ -83,6 +83,9 @@ export interface ConversationState {
 export interface AppState {
   sidebarOpen: boolean;
   activeObjectId: string | null;
+  isConnected: boolean;
+  connectionError: string | null;
+  voiceEnabled: boolean;
 }
 
 // Main store interface
@@ -117,9 +120,11 @@ export interface GravityStore {
   appState: AppState;
   toggleSidebar: (forceState?: boolean) => void;
   setActiveObject: (id: string | null) => void;
+  setConnectionStatus: (isConnected: boolean, error?: string) => void;
+  setVoiceEnabled: (enabled: boolean) => void;
 
   // Actions
-  sendMessage: (text: string) => Promise<void>;
+  sendMessage: (text: string, userId?: string, enableAudio?: boolean) => Promise<void>;
 }
 
 // Re-export shared types that are used in client
