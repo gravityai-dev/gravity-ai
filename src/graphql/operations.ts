@@ -132,3 +132,104 @@ export const GET_CHAT_STATUS = gql`
     }
   }
 `;
+
+// Workflow-related operations
+
+// Query to fetch all available node types
+export const GET_NODE_TYPES = gql`
+  query GetNodeTypes {
+    nodeTypes {
+      id
+      name
+      description
+      category
+      color
+      logoUrl
+      inputs {
+        id
+        label
+      }
+      outputs {
+        id
+        label
+      }
+      configSchema
+    }
+  }
+`;
+
+// Query to fetch all workflows
+export const GET_WORKFLOWS = gql`
+  query GetWorkflows {
+    workflows {
+      id
+      name
+      description
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Query to fetch a specific workflow
+export const GET_WORKFLOW = gql`
+  query GetWorkflow($id: ID!) {
+    workflow(id: $id) {
+      id
+      name
+      description
+      nodes
+      edges
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Mutation to save a workflow
+export const SAVE_WORKFLOW = gql`
+  mutation SaveWorkflow($input: WorkflowInput!) {
+    saveWorkflow(input: $input) {
+      id
+      name
+      description
+      nodes
+      edges
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Mutation to delete a workflow
+export const DELETE_WORKFLOW = gql`
+  mutation DeleteWorkflow($id: ID!) {
+    deleteWorkflow(id: $id)
+  }
+`;
+
+// Mutation to execute a workflow
+export const EXECUTE_WORKFLOW = gql`
+  mutation ExecuteWorkflow($id: ID!, $input: JSON!) {
+    executeWorkflow(id: $id, input: $input) {
+      executionId
+      workflowId
+      status
+      startedAt
+    }
+  }
+`;
+
+// Query to check workflow execution status
+export const GET_WORKFLOW_EXECUTION = gql`
+  query GetWorkflowExecution($executionId: ID!) {
+    workflowExecution(executionId: $executionId) {
+      executionId
+      workflowId
+      status
+      startedAt
+      completedAt
+      result
+    }
+  }
+`;

@@ -54,6 +54,25 @@ export function setActiveObject(id: string | null) {
 export { transformServerToClientMessage } from './shared';
 export { audioEventEmitter } from './utils/audioEventEmitter';
 
+// GraphQL Operations
+export { 
+  TALK_TO_AGENT,
+  AGENT_STREAM,
+  GET_CHAT_STATUS,
+  GET_NODE_TYPES,
+  GET_WORKFLOWS,
+  GET_WORKFLOW,
+  SAVE_WORKFLOW,
+  DELETE_WORKFLOW,
+  EXECUTE_WORKFLOW,
+  GET_WORKFLOW_EXECUTION 
+} from './graphql/operations';
+
+// GraphQL Subscriptions
+export {
+  WORKFLOW_EXECUTION_SUBSCRIPTION
+} from './graphql/subscriptions';
+
 // Types
 export type {
   GravityConfig,

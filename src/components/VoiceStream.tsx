@@ -2,13 +2,14 @@
  * VoiceStream Component
  * 
  * Handles playback of AudioChunk messages received from the server
- * No longer needs direct ElevenLabs API integration as audio is generated server-side
+ * Uses Howler.js for seamless audio streaming of chunks
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { useGravity } from '../hooks/useGravity';
 import { AudioChunk } from '../shared/types';
 import { audioEventEmitter } from '../utils/audioEventEmitter';
+import { Howl } from 'howler';
 
 export interface VoiceStreamProps {
   autoplay?: boolean;
@@ -25,57 +26,19 @@ export const VoiceStream: React.FC<VoiceStreamProps> = ({
 }) => {
   const { activeResponse } = useGravity();
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioQueueRef = useRef<AudioChunk[]>([]);
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const [isFirstChunk, setIsFirstChunk] = useState(true);
+  const howlRef = useRef<Howl | null>(null);
+  const pendingChunksRef = useRef<AudioChunk[]>([]);
   const processedChunksRef = useRef<Set<string>>(new Set());
-  const isProcessingRef = useRef(false);
+  const conversationIdRef = useRef<string | null>(null);
 
   // Create a unique ID for an audio chunk
   const getChunkId = (chunk: AudioChunk): string => {
-    return `${chunk.chatId}-${chunk.timestamp}-${chunk.sourceType}`;
+    return `${chunk.conversationId}-${chunk.timestamp}`;
   };
 
-  // Play audio from base64 data
-  const playAudioChunk = async (chunk: AudioChunk) => {
-    try {
-      if (!chunk.audioData) {
-        console.warn('[VoiceStream] Audio chunk missing data');
-        return;
-      }
-
-      // Create audio element if it doesn't exist
-      if (!audioElementRef.current) {
-        audioElementRef.current = new Audio();
-        audioElementRef.current.addEventListener('ended', handleAudioEnded);
-        audioElementRef.current.addEventListener('error', handleAudioError);
-      }
-
-      // Convert base64 to blob
-      const audioBlob = base64ToBlob(chunk.audioData, `audio/${chunk.format}`);
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      // Set the source and play
-      audioElementRef.current.src = audioUrl;
-      setIsPlaying(true);
-      onStart?.();
-      
-      await audioElementRef.current.play();
-
-      // Clean up the object URL after playing
-      audioElementRef.current.addEventListener('ended', () => {
-        URL.revokeObjectURL(audioUrl);
-      }, { once: true });
-
-    } catch (error) {
-      console.error('[VoiceStream] Error playing audio:', error);
-      onError?.(error instanceof Error ? error : new Error('Failed to play audio'));
-      setIsPlaying(false);
-      processNextInQueue();
-    }
-  };
-
-  // Convert base64 to blob
-  const base64ToBlob = (base64: string, mimeType: string): Blob => {
+  // Convert base64 to a URL
+  const base64ToURL = (base64: string, format: string): string => {
     const byteCharacters = atob(base64);
     const byteNumbers = new Array(byteCharacters.length);
     
@@ -84,41 +47,92 @@ export const VoiceStream: React.FC<VoiceStreamProps> = ({
     }
     
     const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: mimeType });
+    const blob = new Blob([byteArray], { type: `audio/${format}` });
+    return URL.createObjectURL(blob);
   };
 
-  // Handle when audio finishes playing
-  const handleAudioEnded = () => {
-    setIsPlaying(false);
-    processNextInQueue();
-  };
+  // Handle audio playing
+  const playAudioChunk = (chunk: AudioChunk) => {
+    try {
+      if (!chunk.audioData) {
+        console.warn('[VoiceStream] Audio chunk missing data');
+        return;
+      }
 
-  // Handle audio errors
-  const handleAudioError = (event: Event) => {
-    const error = new Error('Audio playback error');
-    console.error('[VoiceStream] Audio error:', event);
-    onError?.(error);
-    setIsPlaying(false);
-    processNextInQueue();
-  };
-
-  // Process the next audio chunk in the queue
-  const processNextInQueue = async () => {
-    if (isProcessingRef.current || audioQueueRef.current.length === 0) {
-      isProcessingRef.current = false;
+      // Check if this is a new conversation
+      if (conversationIdRef.current !== chunk.conversationId) {
+        // Stop any existing audio
+        if (howlRef.current) {
+          howlRef.current.stop();
+          howlRef.current.unload();
+          howlRef.current = null;
+        }
+        conversationIdRef.current = chunk.conversationId;
+        setIsFirstChunk(true);
+        processedChunksRef.current.clear();
+      }
       
+      // Convert to blob URL
+      const audioUrl = base64ToURL(chunk.audioData, chunk.format);
+      
+      // Create and play howl
+      const howl = new Howl({
+        src: [audioUrl],
+        format: [chunk.format],
+        autoplay: true,
+        html5: true, // Force HTML5 Audio for streaming
+        onload: () => {
+          console.log('[VoiceStream] Howl loaded:', { chunk: chunk.textReference });
+        },
+        onplay: () => {
+          console.log('[VoiceStream] Howl playing');
+          setIsPlaying(true);
+          
+          if (isFirstChunk) {
+            onStart?.();
+            setIsFirstChunk(false);
+          }
+        },
+        onend: () => {
+          console.log('[VoiceStream] Howl ended');
+          URL.revokeObjectURL(audioUrl); // Clean up URL
+          playNextChunk();
+        },
+        onloaderror: (id, error) => {
+          console.error('[VoiceStream] Howl load error:', error);
+          onError?.(new Error(`Failed to load audio: ${error}`));
+          URL.revokeObjectURL(audioUrl); // Clean up URL
+          playNextChunk();
+        },
+        onplayerror: (id, error) => {
+          console.error('[VoiceStream] Howl play error:', error);
+          onError?.(new Error(`Failed to play audio: ${error}`));
+          URL.revokeObjectURL(audioUrl); // Clean up URL
+          playNextChunk();
+        }
+      });
+      
+      howlRef.current = howl;
+    } catch (error) {
+      console.error('[VoiceStream] Error creating Howl:', error);
+      onError?.(error instanceof Error ? error : new Error('Failed to create audio'));
+      playNextChunk();
+    }
+  };
+
+  // Play the next chunk in the queue
+  const playNextChunk = () => {
+    if (pendingChunksRef.current.length > 0) {
+      const nextChunk = pendingChunksRef.current.shift();
+      if (nextChunk) {
+        playAudioChunk(nextChunk);
+      }
+    } else {
+      setIsPlaying(false);
       // Check if we're done with all audio
-      if (audioQueueRef.current.length === 0 && activeResponse?.state === 'COMPLETE') {
+      if (activeResponse?.state === 'COMPLETE') {
         onComplete?.();
       }
-      return;
-    }
-
-    isProcessingRef.current = true;
-    const nextChunk = audioQueueRef.current.shift();
-    
-    if (nextChunk) {
-      await playAudioChunk(nextChunk);
     }
   };
 
@@ -131,8 +145,7 @@ export const VoiceStream: React.FC<VoiceStreamProps> = ({
       console.log('[VoiceStream] Received audio chunk:', {
         hasData: !!chunk.audioData,
         format: chunk.format,
-        textReference: chunk.textReference,
-        sourceType: chunk.sourceType,
+        textRef: chunk.textReference?.substring(0, 20),
         dataLength: chunk.audioData?.length
       });
       
@@ -140,11 +153,13 @@ export const VoiceStream: React.FC<VoiceStreamProps> = ({
       
       if (!processedChunksRef.current.has(chunkId)) {
         processedChunksRef.current.add(chunkId);
-        audioQueueRef.current.push(chunk);
         
-        // Start processing if not already playing
-        if (!isPlaying && !isProcessingRef.current) {
-          processNextInQueue();
+        // Add to pending queue
+        pendingChunksRef.current.push(chunk);
+        
+        // Start playing if not already playing
+        if (!isPlaying) {
+          playNextChunk();
         }
       }
     });
@@ -157,11 +172,10 @@ export const VoiceStream: React.FC<VoiceStreamProps> = ({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (audioElementRef.current) {
-        audioElementRef.current.pause();
-        audioElementRef.current.removeEventListener('ended', handleAudioEnded);
-        audioElementRef.current.removeEventListener('error', handleAudioError);
-        audioElementRef.current = null;
+      if (howlRef.current) {
+        howlRef.current.stop();
+        howlRef.current.unload();
+        howlRef.current = null;
       }
     };
   }, []);
