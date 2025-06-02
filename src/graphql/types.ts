@@ -357,6 +357,7 @@ export type NodeType = {
   logoUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   outputs: Array<NodePort>;
+  testData?: Maybe<Scalars['JSON']['output']>;
 };
 
 export type ProgressUpdate = BaseEvent & {
@@ -534,7 +535,7 @@ export type GetChatStatusQuery = { __typename?: 'Query', getChatStatus: { __type
 export type GetNodeTypesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodeTypesQuery = { __typename?: 'Query', nodeTypes: Array<{ __typename?: 'NodeType', id: string, name: string, description?: string | null, category: string, color: string, logoUrl?: string | null, configSchema?: any | null, inputs: Array<{ __typename?: 'NodePort', id: string, label: string, type?: string | null, required?: boolean | null, description?: string | null }>, outputs: Array<{ __typename?: 'NodePort', id: string, label: string, type?: string | null }>, credentials?: Array<{ __typename?: 'NodeCredential', name: string, required: boolean, displayName?: string | null, description?: string | null }> | null }> };
+export type GetNodeTypesQuery = { __typename?: 'Query', nodeTypes: Array<{ __typename?: 'NodeType', id: string, name: string, description?: string | null, category: string, color: string, logoUrl?: string | null, configSchema?: any | null, testData?: any | null, inputs: Array<{ __typename?: 'NodePort', id: string, label: string, type?: string | null, required?: boolean | null, description?: string | null }>, outputs: Array<{ __typename?: 'NodePort', id: string, label: string, type?: string | null }>, credentials?: Array<{ __typename?: 'NodeCredential', name: string, required: boolean, displayName?: string | null, description?: string | null }> | null }> };
 
 export type GetWorkflowsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -877,6 +878,7 @@ export const GetNodeTypesDocument = gql`
       displayName
       description
     }
+    testData
   }
 }
     `;

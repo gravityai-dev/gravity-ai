@@ -164,6 +164,7 @@ export const GET_NODE_TYPES = gql`
         displayName
         description
       }
+      testData
     }
   }
 `;
