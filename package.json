@@ -1,6 +1,6 @@
 {
   "name": "@gravityai-dev/gravity-ai",
-  "version": "0.2.29",
+  "version": "0.2.30",
   "description": "Unified library for Gravity AI - Real-time AI messaging for React and Node.js",
   "private": false,
   "main": "dist/index.js",
@@ -37,7 +37,7 @@
   "dependencies": {
     "@apollo/client": "^3.8.0",
     "@graphql-yoga/apollo-link": "^4.0.0",
-    "@gravityai-dev/gravity-server": "^0.2.29",
+    "@gravityai-dev/gravity-server": "^0.2.30",
     "graphql": "^16.8.0",
     "graphql-ws": "^5.14.0",
     "howler": "^2.2.4",

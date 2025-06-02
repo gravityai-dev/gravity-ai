@@ -112,6 +112,65 @@ export type ChatStatus = {
   status: Scalars['String']['output'];
 };
 
+export type Credential = {
+  __typename?: 'Credential';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type CredentialInput = {
+  data: Scalars['JSON']['input'];
+  name: Scalars['String']['input'];
+  type: Scalars['String']['input'];
+};
+
+export type CredentialProperty = {
+  __typename?: 'CredentialProperty';
+  default?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  displayName: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  placeholder?: Maybe<Scalars['String']['output']>;
+  required: Scalars['Boolean']['output'];
+  secret: Scalars['Boolean']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type CredentialType = {
+  __typename?: 'CredentialType';
+  description: Scalars['String']['output'];
+  displayName: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  properties: Array<CredentialProperty>;
+};
+
+export type CredentialWithData = {
+  __typename?: 'CredentialWithData';
+  createdAt: Scalars['String']['output'];
+  data: Scalars['JSON']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type DebugNodeInput = {
+  config: Scalars['JSON']['input'];
+  context: Scalars['JSON']['input'];
+  nodeType: Scalars['String']['input'];
+};
+
+export type DebugNodeResult = {
+  __typename?: 'DebugNodeResult';
+  duration?: Maybe<Scalars['Int']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  output?: Maybe<Scalars['JSON']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type ImageResponse = BaseEvent & {
   __typename?: 'ImageResponse';
   alt?: Maybe<Scalars['String']['output']>;
@@ -178,15 +237,34 @@ export type Metadata = BaseEvent & {
 export type Mutation = {
   __typename?: 'Mutation';
   cancelAgentChat: CancelResponse;
+  createCredential: Credential;
+  debugNode: DebugNodeResult;
+  deleteCredential: Scalars['Boolean']['output'];
   deleteWorkflow: Scalars['Boolean']['output'];
   executeWorkflow: WorkflowExecution;
   saveWorkflow: Workflow;
   talkToAgent: AgentResponse;
+  updateCredential: Credential;
 };
 
 
 export type MutationCancelAgentChatArgs = {
   chatId: Scalars['ID']['input'];
+};
+
+
+export type MutationCreateCredentialArgs = {
+  input: CredentialInput;
+};
+
+
+export type MutationDebugNodeArgs = {
+  input: DebugNodeInput;
+};
+
+
+export type MutationDeleteCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -210,6 +288,20 @@ export type MutationTalkToAgentArgs = {
   input: AgentInput;
 };
 
+
+export type MutationUpdateCredentialArgs = {
+  id: Scalars['ID']['input'];
+  input: CredentialInput;
+};
+
+export type NodeCredential = {
+  __typename?: 'NodeCredential';
+  description?: Maybe<Scalars['String']['output']>;
+  displayName?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  required: Scalars['Boolean']['output'];
+};
+
 export type NodeExecutionEvent = {
   __typename?: 'NodeExecutionEvent';
   duration?: Maybe<Scalars['Int']['output']>;
@@ -231,8 +323,26 @@ export enum NodeExecutionState {
 
 export type NodePort = {
   __typename?: 'NodePort';
+  description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   label: Scalars['String']['output'];
+  required?: Maybe<Scalars['Boolean']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type NodeTrace = {
+  __typename?: 'NodeTrace';
+  duration?: Maybe<Scalars['Float']['output']>;
+  endTime?: Maybe<Scalars['Float']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  executionId: Scalars['ID']['output'];
+  inputs?: Maybe<Scalars['JSON']['output']>;
+  nodeId: Scalars['ID']['output'];
+  nodeType: Scalars['String']['output'];
+  outputs?: Maybe<Scalars['JSON']['output']>;
+  startTime: Scalars['Float']['output'];
+  status: Scalars['String']['output'];
+  traceId: Scalars['ID']['output'];
 };
 
 export type NodeType = {
@@ -240,6 +350,7 @@ export type NodeType = {
   category: Scalars['String']['output'];
   color: Scalars['String']['output'];
   configSchema?: Maybe<Scalars['JSON']['output']>;
+  credentials?: Maybe<Array<NodeCredential>>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inputs: Array<NodePort>;
@@ -270,21 +381,37 @@ export type ProviderStatus = {
 
 export type Query = {
   __typename?: 'Query';
+  credential?: Maybe<CredentialWithData>;
+  credentialTypes: Array<CredentialType>;
+  credentials: Array<Credential>;
   getChatStatus: ChatStatus;
   introspectAgentTypes?: Maybe<AgentTypeInfo>;
   mcpStatus: ProviderStatus;
   mcpTools: McpToolsResponse;
   n8nStatus: ProviderStatus;
+  nodeTraces: Array<NodeTrace>;
   nodeTypes: Array<NodeType>;
   ping: Scalars['String']['output'];
   workflow?: Maybe<Workflow>;
   workflowExecution?: Maybe<WorkflowExecution>;
+  workflowExecutions: Array<WorkflowExecution>;
   workflows: Array<Workflow>;
+};
+
+
+export type QueryCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
 export type QueryGetChatStatusArgs = {
   chatId: Scalars['ID']['input'];
+};
+
+
+export type QueryNodeTracesArgs = {
+  executionId: Scalars['ID']['input'];
+  nodeId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -295,6 +422,12 @@ export type QueryWorkflowArgs = {
 
 export type QueryWorkflowExecutionArgs = {
   executionId: Scalars['ID']['input'];
+};
+
+
+export type QueryWorkflowExecutionsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  workflowId: Scalars['ID']['input'];
 };
 
 export type Subscription = {
@@ -401,7 +534,7 @@ export type GetChatStatusQuery = { __typename?: 'Query', getChatStatus: { __type
 export type GetNodeTypesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodeTypesQuery = { __typename?: 'Query', nodeTypes: Array<{ __typename?: 'NodeType', id: string, name: string, description?: string | null, category: string, color: string, logoUrl?: string | null, configSchema?: any | null, inputs: Array<{ __typename?: 'NodePort', id: string, label: string }>, outputs: Array<{ __typename?: 'NodePort', id: string, label: string }> }> };
+export type GetNodeTypesQuery = { __typename?: 'Query', nodeTypes: Array<{ __typename?: 'NodeType', id: string, name: string, description?: string | null, category: string, color: string, logoUrl?: string | null, configSchema?: any | null, inputs: Array<{ __typename?: 'NodePort', id: string, label: string, type?: string | null, required?: boolean | null, description?: string | null }>, outputs: Array<{ __typename?: 'NodePort', id: string, label: string, type?: string | null }>, credentials?: Array<{ __typename?: 'NodeCredential', name: string, required: boolean, displayName?: string | null, description?: string | null }> | null }> };
 
 export type GetWorkflowsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -443,6 +576,68 @@ export type GetWorkflowExecutionQueryVariables = Exact<{
 
 
 export type GetWorkflowExecutionQuery = { __typename?: 'Query', workflowExecution?: { __typename?: 'WorkflowExecution', executionId: string, workflowId: string, status: string, startedAt: string, completedAt?: string | null, result?: any | null } | null };
+
+export type GetWorkflowExecutionsQueryVariables = Exact<{
+  workflowId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetWorkflowExecutionsQuery = { __typename?: 'Query', workflowExecutions: Array<{ __typename?: 'WorkflowExecution', executionId: string, workflowId: string, status: string, startedAt: string, completedAt?: string | null, result?: any | null }> };
+
+export type GetNodeTracesQueryVariables = Exact<{
+  executionId: Scalars['ID']['input'];
+  nodeId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetNodeTracesQuery = { __typename?: 'Query', nodeTraces: Array<{ __typename?: 'NodeTrace', traceId: string, executionId: string, nodeId: string, nodeType: string, startTime: number, endTime?: number | null, duration?: number | null, status: string, inputs?: any | null, outputs?: any | null, error?: string | null }> };
+
+export type DebugNodeMutationVariables = Exact<{
+  input: DebugNodeInput;
+}>;
+
+
+export type DebugNodeMutation = { __typename?: 'Mutation', debugNode: { __typename?: 'DebugNodeResult', success: boolean, output?: any | null, error?: string | null, duration?: number | null } };
+
+export type GetCredentialTypesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCredentialTypesQuery = { __typename?: 'Query', credentialTypes: Array<{ __typename?: 'CredentialType', name: string, displayName: string, description: string, properties: Array<{ __typename?: 'CredentialProperty', name: string, displayName: string, description?: string | null, type: string, required: boolean, secret: boolean, default?: string | null, placeholder?: string | null }> }> };
+
+export type GetCredentialsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCredentialsQuery = { __typename?: 'Query', credentials: Array<{ __typename?: 'Credential', id: string, name: string, type: string, createdAt: string, updatedAt: string }> };
+
+export type GetCredentialQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetCredentialQuery = { __typename?: 'Query', credential?: { __typename?: 'CredentialWithData', id: string, name: string, type: string, data: any, createdAt: string, updatedAt: string } | null };
+
+export type CreateCredentialMutationVariables = Exact<{
+  input: CredentialInput;
+}>;
+
+
+export type CreateCredentialMutation = { __typename?: 'Mutation', createCredential: { __typename?: 'Credential', id: string, name: string, type: string, createdAt: string, updatedAt: string } };
+
+export type UpdateCredentialMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: CredentialInput;
+}>;
+
+
+export type UpdateCredentialMutation = { __typename?: 'Mutation', updateCredential: { __typename?: 'Credential', id: string, name: string, type: string, createdAt: string, updatedAt: string } };
+
+export type DeleteCredentialMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteCredentialMutation = { __typename?: 'Mutation', deleteCredential: boolean };
 
 
 export const TalkToAgentDocument = gql`
@@ -666,12 +861,22 @@ export const GetNodeTypesDocument = gql`
     inputs {
       id
       label
+      type
+      required
+      description
     }
     outputs {
       id
       label
+      type
     }
     configSchema
+    credentials {
+      name
+      required
+      displayName
+      description
+    }
   }
 }
     `;
@@ -948,3 +1153,381 @@ export type GetWorkflowExecutionQueryHookResult = ReturnType<typeof useGetWorkfl
 export type GetWorkflowExecutionLazyQueryHookResult = ReturnType<typeof useGetWorkflowExecutionLazyQuery>;
 export type GetWorkflowExecutionSuspenseQueryHookResult = ReturnType<typeof useGetWorkflowExecutionSuspenseQuery>;
 export type GetWorkflowExecutionQueryResult = Apollo.QueryResult<GetWorkflowExecutionQuery, GetWorkflowExecutionQueryVariables>;
+export const GetWorkflowExecutionsDocument = gql`
+    query GetWorkflowExecutions($workflowId: ID!, $limit: Int) {
+  workflowExecutions(workflowId: $workflowId, limit: $limit) {
+    executionId
+    workflowId
+    status
+    startedAt
+    completedAt
+    result
+  }
+}
+    `;
+
+/**
+ * __useGetWorkflowExecutionsQuery__
+ *
+ * To run a query within a React component, call `useGetWorkflowExecutionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWorkflowExecutionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWorkflowExecutionsQuery({
+ *   variables: {
+ *      workflowId: // value for 'workflowId'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetWorkflowExecutionsQuery(baseOptions: Apollo.QueryHookOptions<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables> & ({ variables: GetWorkflowExecutionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables>(GetWorkflowExecutionsDocument, options);
+      }
+export function useGetWorkflowExecutionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables>(GetWorkflowExecutionsDocument, options);
+        }
+export function useGetWorkflowExecutionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables>(GetWorkflowExecutionsDocument, options);
+        }
+export type GetWorkflowExecutionsQueryHookResult = ReturnType<typeof useGetWorkflowExecutionsQuery>;
+export type GetWorkflowExecutionsLazyQueryHookResult = ReturnType<typeof useGetWorkflowExecutionsLazyQuery>;
+export type GetWorkflowExecutionsSuspenseQueryHookResult = ReturnType<typeof useGetWorkflowExecutionsSuspenseQuery>;
+export type GetWorkflowExecutionsQueryResult = Apollo.QueryResult<GetWorkflowExecutionsQuery, GetWorkflowExecutionsQueryVariables>;
+export const GetNodeTracesDocument = gql`
+    query GetNodeTraces($executionId: ID!, $nodeId: ID) {
+  nodeTraces(executionId: $executionId, nodeId: $nodeId) {
+    traceId
+    executionId
+    nodeId
+    nodeType
+    startTime
+    endTime
+    duration
+    status
+    inputs
+    outputs
+    error
+  }
+}
+    `;
+
+/**
+ * __useGetNodeTracesQuery__
+ *
+ * To run a query within a React component, call `useGetNodeTracesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNodeTracesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNodeTracesQuery({
+ *   variables: {
+ *      executionId: // value for 'executionId'
+ *      nodeId: // value for 'nodeId'
+ *   },
+ * });
+ */
+export function useGetNodeTracesQuery(baseOptions: Apollo.QueryHookOptions<GetNodeTracesQuery, GetNodeTracesQueryVariables> & ({ variables: GetNodeTracesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNodeTracesQuery, GetNodeTracesQueryVariables>(GetNodeTracesDocument, options);
+      }
+export function useGetNodeTracesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNodeTracesQuery, GetNodeTracesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNodeTracesQuery, GetNodeTracesQueryVariables>(GetNodeTracesDocument, options);
+        }
+export function useGetNodeTracesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNodeTracesQuery, GetNodeTracesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetNodeTracesQuery, GetNodeTracesQueryVariables>(GetNodeTracesDocument, options);
+        }
+export type GetNodeTracesQueryHookResult = ReturnType<typeof useGetNodeTracesQuery>;
+export type GetNodeTracesLazyQueryHookResult = ReturnType<typeof useGetNodeTracesLazyQuery>;
+export type GetNodeTracesSuspenseQueryHookResult = ReturnType<typeof useGetNodeTracesSuspenseQuery>;
+export type GetNodeTracesQueryResult = Apollo.QueryResult<GetNodeTracesQuery, GetNodeTracesQueryVariables>;
+export const DebugNodeDocument = gql`
+    mutation DebugNode($input: DebugNodeInput!) {
+  debugNode(input: $input) {
+    success
+    output
+    error
+    duration
+  }
+}
+    `;
+export type DebugNodeMutationFn = Apollo.MutationFunction<DebugNodeMutation, DebugNodeMutationVariables>;
+
+/**
+ * __useDebugNodeMutation__
+ *
+ * To run a mutation, you first call `useDebugNodeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDebugNodeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [debugNodeMutation, { data, loading, error }] = useDebugNodeMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDebugNodeMutation(baseOptions?: Apollo.MutationHookOptions<DebugNodeMutation, DebugNodeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DebugNodeMutation, DebugNodeMutationVariables>(DebugNodeDocument, options);
+      }
+export type DebugNodeMutationHookResult = ReturnType<typeof useDebugNodeMutation>;
+export type DebugNodeMutationResult = Apollo.MutationResult<DebugNodeMutation>;
+export type DebugNodeMutationOptions = Apollo.BaseMutationOptions<DebugNodeMutation, DebugNodeMutationVariables>;
+export const GetCredentialTypesDocument = gql`
+    query GetCredentialTypes {
+  credentialTypes {
+    name
+    displayName
+    description
+    properties {
+      name
+      displayName
+      description
+      type
+      required
+      secret
+      default
+      placeholder
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCredentialTypesQuery__
+ *
+ * To run a query within a React component, call `useGetCredentialTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCredentialTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCredentialTypesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCredentialTypesQuery(baseOptions?: Apollo.QueryHookOptions<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>(GetCredentialTypesDocument, options);
+      }
+export function useGetCredentialTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>(GetCredentialTypesDocument, options);
+        }
+export function useGetCredentialTypesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>(GetCredentialTypesDocument, options);
+        }
+export type GetCredentialTypesQueryHookResult = ReturnType<typeof useGetCredentialTypesQuery>;
+export type GetCredentialTypesLazyQueryHookResult = ReturnType<typeof useGetCredentialTypesLazyQuery>;
+export type GetCredentialTypesSuspenseQueryHookResult = ReturnType<typeof useGetCredentialTypesSuspenseQuery>;
+export type GetCredentialTypesQueryResult = Apollo.QueryResult<GetCredentialTypesQuery, GetCredentialTypesQueryVariables>;
+export const GetCredentialsDocument = gql`
+    query GetCredentials {
+  credentials {
+    id
+    name
+    type
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetCredentialsQuery__
+ *
+ * To run a query within a React component, call `useGetCredentialsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCredentialsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCredentialsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCredentialsQuery(baseOptions?: Apollo.QueryHookOptions<GetCredentialsQuery, GetCredentialsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCredentialsQuery, GetCredentialsQueryVariables>(GetCredentialsDocument, options);
+      }
+export function useGetCredentialsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCredentialsQuery, GetCredentialsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCredentialsQuery, GetCredentialsQueryVariables>(GetCredentialsDocument, options);
+        }
+export function useGetCredentialsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCredentialsQuery, GetCredentialsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCredentialsQuery, GetCredentialsQueryVariables>(GetCredentialsDocument, options);
+        }
+export type GetCredentialsQueryHookResult = ReturnType<typeof useGetCredentialsQuery>;
+export type GetCredentialsLazyQueryHookResult = ReturnType<typeof useGetCredentialsLazyQuery>;
+export type GetCredentialsSuspenseQueryHookResult = ReturnType<typeof useGetCredentialsSuspenseQuery>;
+export type GetCredentialsQueryResult = Apollo.QueryResult<GetCredentialsQuery, GetCredentialsQueryVariables>;
+export const GetCredentialDocument = gql`
+    query GetCredential($id: ID!) {
+  credential(id: $id) {
+    id
+    name
+    type
+    data
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetCredentialQuery__
+ *
+ * To run a query within a React component, call `useGetCredentialQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCredentialQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCredentialQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetCredentialQuery(baseOptions: Apollo.QueryHookOptions<GetCredentialQuery, GetCredentialQueryVariables> & ({ variables: GetCredentialQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCredentialQuery, GetCredentialQueryVariables>(GetCredentialDocument, options);
+      }
+export function useGetCredentialLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCredentialQuery, GetCredentialQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCredentialQuery, GetCredentialQueryVariables>(GetCredentialDocument, options);
+        }
+export function useGetCredentialSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCredentialQuery, GetCredentialQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCredentialQuery, GetCredentialQueryVariables>(GetCredentialDocument, options);
+        }
+export type GetCredentialQueryHookResult = ReturnType<typeof useGetCredentialQuery>;
+export type GetCredentialLazyQueryHookResult = ReturnType<typeof useGetCredentialLazyQuery>;
+export type GetCredentialSuspenseQueryHookResult = ReturnType<typeof useGetCredentialSuspenseQuery>;
+export type GetCredentialQueryResult = Apollo.QueryResult<GetCredentialQuery, GetCredentialQueryVariables>;
+export const CreateCredentialDocument = gql`
+    mutation CreateCredential($input: CredentialInput!) {
+  createCredential(input: $input) {
+    id
+    name
+    type
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateCredentialMutationFn = Apollo.MutationFunction<CreateCredentialMutation, CreateCredentialMutationVariables>;
+
+/**
+ * __useCreateCredentialMutation__
+ *
+ * To run a mutation, you first call `useCreateCredentialMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCredentialMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCredentialMutation, { data, loading, error }] = useCreateCredentialMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCredentialMutation(baseOptions?: Apollo.MutationHookOptions<CreateCredentialMutation, CreateCredentialMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCredentialMutation, CreateCredentialMutationVariables>(CreateCredentialDocument, options);
+      }
+export type CreateCredentialMutationHookResult = ReturnType<typeof useCreateCredentialMutation>;
+export type CreateCredentialMutationResult = Apollo.MutationResult<CreateCredentialMutation>;
+export type CreateCredentialMutationOptions = Apollo.BaseMutationOptions<CreateCredentialMutation, CreateCredentialMutationVariables>;
+export const UpdateCredentialDocument = gql`
+    mutation UpdateCredential($id: ID!, $input: CredentialInput!) {
+  updateCredential(id: $id, input: $input) {
+    id
+    name
+    type
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateCredentialMutationFn = Apollo.MutationFunction<UpdateCredentialMutation, UpdateCredentialMutationVariables>;
+
+/**
+ * __useUpdateCredentialMutation__
+ *
+ * To run a mutation, you first call `useUpdateCredentialMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCredentialMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCredentialMutation, { data, loading, error }] = useUpdateCredentialMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCredentialMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCredentialMutation, UpdateCredentialMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCredentialMutation, UpdateCredentialMutationVariables>(UpdateCredentialDocument, options);
+      }
+export type UpdateCredentialMutationHookResult = ReturnType<typeof useUpdateCredentialMutation>;
+export type UpdateCredentialMutationResult = Apollo.MutationResult<UpdateCredentialMutation>;
+export type UpdateCredentialMutationOptions = Apollo.BaseMutationOptions<UpdateCredentialMutation, UpdateCredentialMutationVariables>;
+export const DeleteCredentialDocument = gql`
+    mutation DeleteCredential($id: ID!) {
+  deleteCredential(id: $id)
+}
+    `;
+export type DeleteCredentialMutationFn = Apollo.MutationFunction<DeleteCredentialMutation, DeleteCredentialMutationVariables>;
+
+/**
+ * __useDeleteCredentialMutation__
+ *
+ * To run a mutation, you first call `useDeleteCredentialMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCredentialMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCredentialMutation, { data, loading, error }] = useDeleteCredentialMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCredentialMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCredentialMutation, DeleteCredentialMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCredentialMutation, DeleteCredentialMutationVariables>(DeleteCredentialDocument, options);
+      }
+export type DeleteCredentialMutationHookResult = ReturnType<typeof useDeleteCredentialMutation>;
+export type DeleteCredentialMutationResult = Apollo.MutationResult<DeleteCredentialMutation>;
+export type DeleteCredentialMutationOptions = Apollo.BaseMutationOptions<DeleteCredentialMutation, DeleteCredentialMutationVariables>;
