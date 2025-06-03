@@ -124,7 +124,7 @@ export interface GravityStore {
   setVoiceEnabled: (enabled: boolean) => void;
 
   // Actions
-  sendMessage: (text: string, userId?: string, enableAudio?: boolean) => Promise<void>;
+  sendMessage: (params: import('./store/slices/conversationSlice').SendMessageParams) => Promise<void>;
 }
 
 // Re-export shared types that are used in client

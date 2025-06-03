@@ -17,6 +17,24 @@ import { TALK_TO_AGENT } from '../../graphql/operations';
 import { ChatState } from '../../shared/types';
 
 /**
+ * Parameters for sending a message
+ */
+export interface SendMessageParams {
+  message: string;
+  userId: string;
+  conversationId?: string;
+  chatId?: string;
+  providerId?: string;
+  timestamp?: string;
+  metadata?: {
+    workflowId?: string;
+    targetAgent?: string;
+    enableAudio?: boolean;
+    [key: string]: any;
+  };
+}
+
+/**
  * Generates a unique conversation ID using timestamp and random string
  * Format: conv_[timestamp]_[random]
  */
@@ -44,7 +62,7 @@ export interface ConversationSlice {
   setConversationId: (id: string) => void;
   addMessage: (message: GravityEvent) => void;
   clearConversation: () => void;
-  sendMessage: (text: string, userId?: string, enableAudio?: boolean) => Promise<void>;
+  sendMessage: (params: SendMessageParams) => Promise<void>;
 }
 
 /**
@@ -106,16 +124,14 @@ export const createConversationSlice = (
    * Sends a user message to the server via GraphQL mutation
    *
    * Flow:
-   * 1. Generate conversation/chat IDs if needed
+   * 1. Validate required fields
    * 2. Set up subscription for the conversation
    * 3. Send message via GraphQL mutation
    * 4. Server processes message and sends back through subscription
    *
-   * @param text - The message text to send
-   * @param userId - Optional user ID, defaults to 'anonymous'
-   * @param enableAudio - Optional flag to enable audio generation for responses
+   * @param params - The message parameters
    */
-  sendMessage: async (text: string, userId?: string, enableAudio?: boolean) => {
+  sendMessage: async (params: SendMessageParams) => {
     const state = get();
     const {
       connection,
@@ -143,16 +159,16 @@ export const createConversationSlice = (
 
     try {
       // Generate new conversation and chat IDs if this is a new conversation
-      let conversationId = conversation.conversationId || activeResponse.conversationId;
-      let chatId = activeResponse.chatId;
+      let conversationId = params.conversationId || conversation.conversationId || activeResponse.conversationId;
+      let chatId = params.chatId || activeResponse.chatId;
 
       if (!conversationId) {
         conversationId = generateConversationId();
-        chatId = generateChatId();
+        chatId = chatId || generateChatId();
 
         // Update state with new IDs
         setConversationId(conversationId);
-        startActiveResponse(chatId, conversationId, userId || 'anonymous');
+        startActiveResponse(chatId, conversationId, params.userId);
 
         // Set up subscription for this conversation
         const setupSubscription = get().setupSubscription;
@@ -167,20 +183,22 @@ export const createConversationSlice = (
         console.log('[Gravity AI] Sending mutation with:', {
           conversationId,
           chatId,
-          userId: userId || 'anonymous',
-          enableAudio: enableAudio,
-          text: text
+          userId: params.userId,
+          metadata: params.metadata,
+          text: params.message
         });
         
         const response = await connection.client.mutate({
           mutation: TALK_TO_AGENT,
           variables: {
             input: {
-              message: text,
+              message: params.message,
               conversationId: conversationId,
               chatId: chatId,
-              userId: userId || 'anonymous',
-              enableAudio: enableAudio,
+              userId: params.userId,
+              providerId: params.providerId,
+              timestamp: params.timestamp || new Date().toISOString(),
+              metadata: params.metadata
             },
           },
         });

@@ -107,20 +107,3 @@ export const AI_RESULT_SUBSCRIPTION = gql`
     }
   }
 `;
-
-export const WORKFLOW_EXECUTION_SUBSCRIPTION = gql`
-  subscription WorkflowExecution($executionId: ID!) {
-    workflowExecution(executionId: $executionId) {
-      __typename
-      executionId
-      workflowId
-      nodeId
-      nodeType
-      state
-      timestamp
-      duration
-      outputs
-      error
-    }
-  }
-`;
