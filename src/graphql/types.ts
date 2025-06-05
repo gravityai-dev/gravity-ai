@@ -172,6 +172,12 @@ export type DebugNodeResult = {
   workflow?: Maybe<WorkflowContext>;
 };
 
+export type DeleteExecutionsResult = {
+  __typename?: 'DeleteExecutionsResult';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
 export type ExecutionSummary = {
   __typename?: 'ExecutionSummary';
   averageNodeDuration?: Maybe<Scalars['Float']['output']>;
@@ -192,12 +198,21 @@ export type ExecutionTimelineItem = {
   duration?: Maybe<Scalars['Float']['output']>;
   endTime?: Maybe<Scalars['Float']['output']>;
   error?: Maybe<Scalars['String']['output']>;
+  inputs?: Maybe<Scalars['JSON']['output']>;
   nodeId: Scalars['ID']['output'];
+  nodeName?: Maybe<Scalars['String']['output']>;
   nodeType: Scalars['String']['output'];
+  outputs?: Maybe<Scalars['JSON']['output']>;
   relativeEnd?: Maybe<Scalars['Float']['output']>;
   relativeStart: Scalars['Float']['output'];
   startTime: Scalars['Float']['output'];
   status: Scalars['String']['output'];
+};
+
+export type HealthStatus = {
+  __typename?: 'HealthStatus';
+  healthy: Scalars['Boolean']['output'];
+  warnings: Array<Scalars['String']['output']>;
 };
 
 export type ImageResponse = BaseEvent & {
@@ -268,9 +283,11 @@ export type Mutation = {
   cancelAgentChat: CancelResponse;
   createCredential: Credential;
   debugNode: DebugNodeResult;
+  deleteAllExecutions: DeleteExecutionsResult;
   deleteCredential: Scalars['Boolean']['output'];
   deleteWorkflow: Scalars['Boolean']['output'];
   executeWorkflow: WorkflowExecution;
+  resetQueueMetrics: Scalars['Boolean']['output'];
   saveWorkflow: Workflow;
   talkToAgent: AgentResponse;
   updateCredential: Credential;
@@ -292,6 +309,11 @@ export type MutationDebugNodeArgs = {
 };
 
 
+export type MutationDeleteAllExecutionsArgs = {
+  workflowId: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteCredentialArgs = {
   id: Scalars['ID']['input'];
 };
@@ -305,6 +327,11 @@ export type MutationDeleteWorkflowArgs = {
 export type MutationExecuteWorkflowArgs = {
   id: Scalars['ID']['input'];
   input: Scalars['JSON']['input'];
+};
+
+
+export type MutationResetQueueMetricsArgs = {
+  queueName?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -437,6 +464,7 @@ export type Query = {
   nodeTraces: Array<NodeTrace>;
   nodeTypes: Array<NodeType>;
   ping: Scalars['String']['output'];
+  systemPerformanceMetrics: SystemPerformanceMetrics;
   workflow?: Maybe<Workflow>;
   workflowExecution?: Maybe<WorkflowExecution>;
   workflowExecutions: Array<WorkflowExecution>;
@@ -499,6 +527,19 @@ export type QueryWorkflowPerformanceOverviewArgs = {
   workflowId: Scalars['ID']['input'];
 };
 
+export type QueueMetrics = {
+  __typename?: 'QueueMetrics';
+  active: Scalars['Int']['output'];
+  avgProcessingTime: Scalars['Float']['output'];
+  completed: Scalars['Int']['output'];
+  delayed: Scalars['Int']['output'];
+  failed: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  paused: Scalars['Int']['output'];
+  throughput: Scalars['Float']['output'];
+  waiting: Scalars['Int']['output'];
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   aiResult: AgentEvent;
@@ -514,6 +555,24 @@ export type SubscriptionAiResultArgs = {
 
 export type SubscriptionWorkflowExecutionArgs = {
   executionId: Scalars['ID']['input'];
+};
+
+export type SystemMetrics = {
+  __typename?: 'SystemMetrics';
+  cpuUsage: Scalars['Float']['output'];
+  memoryUsage: Scalars['Float']['output'];
+  redisConnections: Scalars['Int']['output'];
+  redisMemory: Scalars['String']['output'];
+  redisOps: Scalars['Int']['output'];
+  workerCount: Scalars['Int']['output'];
+};
+
+export type SystemPerformanceMetrics = {
+  __typename?: 'SystemPerformanceMetrics';
+  health: HealthStatus;
+  queues: Array<QueueMetrics>;
+  system: SystemMetrics;
+  timestamp: Scalars['String']['output'];
 };
 
 export type SystemStatus = {
@@ -556,6 +615,7 @@ export type Workflow = {
   description?: Maybe<Scalars['String']['output']>;
   edges: Scalars['JSON']['output'];
   id: Scalars['ID']['output'];
+  isCached: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   nodes: Scalars['JSON']['output'];
   updatedAt: Scalars['String']['output'];
@@ -575,6 +635,7 @@ export type WorkflowExecution = {
   result?: Maybe<Scalars['JSON']['output']>;
   startedAt: Scalars['String']['output'];
   status: Scalars['String']['output'];
+  wasFromCache: Scalars['Boolean']['output'];
   workflowId: Scalars['ID']['output'];
 };
 
