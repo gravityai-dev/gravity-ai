@@ -48,7 +48,7 @@ export const createConnectionSlice = (
       const httpLink = new HttpLink({
         uri: config.endpoint,
         headers: {
-          ...config.headers,
+          //...config.headers,
           ...(config.apiKey ? { 'x-agent-key': config.apiKey } : {}),
         },
       });
@@ -58,7 +58,7 @@ export const createConnectionSlice = (
       const sseLink = new YogaLink({
         endpoint: config.endpoint, // Use the same HTTP endpoint - not a WebSocket URL
         headers: {
-          ...config.headers,
+          // Only include the essential auth header - remove all other headers to reduce size
           ...(config.apiKey ? { 'x-agent-key': config.apiKey } : {}),
         },
         credentials: 'include',

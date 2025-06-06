@@ -159,7 +159,8 @@ export const createConversationSlice = (
 
     try {
       // Generate new conversation and chat IDs if this is a new conversation
-      let conversationId = params.conversationId || conversation.conversationId || activeResponse.conversationId;
+      let conversationId =
+        params.conversationId || conversation.conversationId || activeResponse.conversationId;
       let chatId = params.chatId || activeResponse.chatId;
 
       if (!conversationId) {
@@ -185,22 +186,27 @@ export const createConversationSlice = (
           chatId,
           userId: params.userId,
           metadata: params.metadata,
-          text: params.message
+          text: params.message,
         });
-        
+
+        // Log the actual mutation variables
+        const mutationVariables = {
+          input: {
+            message: params.message,
+            conversationId: conversationId,
+            chatId: chatId,
+            userId: params.userId,
+            providerId: params.providerId,
+            timestamp: params.timestamp || new Date().toISOString(),
+            metadata: params.metadata,
+          },
+        };
+
+        //console.log('[Gravity AI] Mutation variables:', JSON.stringify(mutationVariables, null, 2));
+
         const response = await connection.client.mutate({
           mutation: TALK_TO_AGENT,
-          variables: {
-            input: {
-              message: params.message,
-              conversationId: conversationId,
-              chatId: chatId,
-              userId: params.userId,
-              providerId: params.providerId,
-              timestamp: params.timestamp || new Date().toISOString(),
-              metadata: params.metadata
-            },
-          },
+          variables: mutationVariables,
         });
 
         //console.log('[Gravity AI] Message sent successfully:', response);
